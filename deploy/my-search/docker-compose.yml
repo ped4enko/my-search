@@ -1,0 +1,79 @@
+# "My Search" - personal SearXNG stack.
+#
+#   docker compose up -d                 # searxng + valkey, http://127.0.0.1:8080
+#   docker compose --profile tls up -d   # + caddy with automatic HTTPS (needs DOMAIN in .env)
+#
+# Based on the upstream template:
+# https://github.com/searxng/searxng/blob/master/container/docker-compose.yml
+
+name: my-search
+
+services:
+  searxng:
+    container_name: my-search-searxng
+    image: docker.io/searxng/searxng:${SEARXNG_VERSION:-latest}
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      SEARXNG_VALKEY_URL: valkey://valkey:6379/0
+    ports:
+      # Bound to localhost by default; Caddy (profile "tls") reaches it over
+      # the compose network. Set SEARXNG_BIND=0.0.0.0 to expose plain HTTP.
+      - "${SEARXNG_BIND:-127.0.0.1}:${SEARXNG_PORT:-8080}:8080"
+    volumes:
+      - ./searxng/:/etc/searxng/:rw
+      - searxng-data:/var/cache/searxng/
+    depends_on:
+      valkey:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "1"
+
+  valkey:
+    container_name: my-search-valkey
+    image: docker.io/valkey/valkey:9-alpine
+    command: valkey-server --save 300 1 --save 60 1000 --loglevel warning
+    restart: unless-stopped
+    volumes:
+      - valkey-data:/data/
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "1"
+
+  caddy:
+    container_name: my-search-caddy
+    image: docker.io/library/caddy:2-alpine
+    profiles: ["tls"]
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - searxng
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "1"
+
+volumes:
+  searxng-data:
+  valkey-data:
+  caddy-data:
+  caddy-config:
