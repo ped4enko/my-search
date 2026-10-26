@@ -1,0 +1,30 @@
+# Reverse proxy with automatic Let's Encrypt TLS.
+# DOMAIN and ACME_EMAIL come from .env (compose passes env_file to caddy).
+# Reference: https://caddyserver.com/docs/caddyfile
+
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		X-Robots-Tag "noindex, nofollow"
+		Referrer-Policy no-referrer
+		Permissions-Policy "accelerometer=(),camera=(),geolocation=(),gyroscope=(),magnetometer=(),microphone=(),payment=(),usb=()"
+		-Server
+	}
+
+	# Cache static assets; everything else is dynamic.
+	@static path /static/*
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	reverse_proxy searxng:8080 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Real-IP {remote_host}
+	}
+}

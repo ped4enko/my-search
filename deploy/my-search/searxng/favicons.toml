@@ -1,0 +1,15 @@
+# Favicon proxy/cache config. Used when search.favicon_resolver is set.
+# Reference: https://docs.searxng.org/admin/searx.favicons.html
+
+[favicons]
+cfg_schema = 1
+
+[favicons.proxy]
+max_age = 2592000   # 30 days
+
+[favicons.cache]
+db_url = "/var/cache/searxng/faviconcache.db"
+HOLD_TIME = 2592000          # 30 days
+LIMIT_TOTAL_BYTES = 209715200   # 200 MB
+BLOB_MAX_BYTES = 40960
+MAINTENANCE_MODE = "auto"
