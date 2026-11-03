@@ -4,7 +4,7 @@ Companion to [`README.md`](./README.md). For a full VPS walkthrough, use the
 bootstrap script from the repo root:
 
 ```bash
-DOMAIN=search.example.com ACME_EMAIL=you@example.com sudo -E bash scripts/bootstrap-vps.sh
+DOMAIN=s.dbn.ua ACME_EMAIL=search@dbn.ua sudo -E bash scripts/bootstrap-vps.sh
 ```
 
 ## What this bundle does

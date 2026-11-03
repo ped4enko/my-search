@@ -4,10 +4,12 @@
 # Idempotent: safe to re-run. Never prints or commits secrets.
 #
 # Usage (as root or a user in the docker group):
-#   DOMAIN=search.example.com ACME_EMAIL=you@example.com \
+#   DOMAIN=s.dbn.ua ACME_EMAIL=search@dbn.ua \
 #     bash scripts/bootstrap-vps.sh
 #
 # Optional env:
+#   DOMAIN     public hostname (default: s.dbn.ua)
+#   ACME_EMAIL Let's Encrypt contact (default: search@dbn.ua)
 #   REPO_URL   git remote (default: https://github.com/ped4enko/my-search.git)
 #   REPO_DIR   clone path (default: /opt/my-search)
 #   BRANCH     git branch  (default: master)
@@ -16,6 +18,8 @@
 
 set -euo pipefail
 
+DOMAIN="${DOMAIN:-s.dbn.ua}"
+ACME_EMAIL="${ACME_EMAIL:-search@dbn.ua}"
 REPO_URL="${REPO_URL:-https://github.com/ped4enko/my-search.git}"
 REPO_DIR="${REPO_DIR:-/opt/my-search}"
 BRANCH="${BRANCH:-master}"
@@ -131,8 +135,8 @@ ensure_env() {
     log "SEARXNG_SECRET already set — leaving unchanged"
   fi
 
-  prompt_if_empty DOMAIN "Public domain (e.g. search.example.com)"
-  prompt_if_empty ACME_EMAIL "Let's Encrypt email"
+  prompt_if_empty DOMAIN "Public domain (e.g. s.dbn.ua)"
+  prompt_if_empty ACME_EMAIL "Let's Encrypt email (e.g. search@dbn.ua)"
 
   # DOMAIN / ACME_EMAIL: upsert without printing values beyond confirmation.
   if grep -qE '^DOMAIN=' "$env_file"; then

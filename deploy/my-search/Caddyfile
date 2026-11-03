@@ -1,5 +1,6 @@
 # Reverse proxy with automatic Let's Encrypt TLS.
 # DOMAIN and ACME_EMAIL come from .env (compose passes env_file to caddy).
+# Production defaults: DOMAIN=s.dbn.ua, ACME_EMAIL=search@dbn.ua
 # Reference: https://caddyserver.com/docs/caddyfile
 
 {

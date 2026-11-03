@@ -20,7 +20,7 @@ deploy/my-search/
 VPS one-shot bootstrap (from the repo root, after clone):
 
 ```bash
-DOMAIN=search.example.com ACME_EMAIL=you@example.com sudo -E bash scripts/bootstrap-vps.sh
+DOMAIN=s.dbn.ua ACME_EMAIL=search@dbn.ua sudo -E bash scripts/bootstrap-vps.sh
 ```
 
 ## 1. Deploy on a VPS
