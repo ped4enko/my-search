@@ -1,0 +1,184 @@
+# "My Search" - personal SearXNG instance.
+#
+# Only the keys below override upstream defaults; everything else comes from
+# searx/settings.yml of the running SearXNG version.
+# Reference: https://docs.searxng.org/admin/settings/
+#
+# Environment variables (set in .env) win over this file for:
+#   SEARXNG_SECRET, SEARXNG_BASE_URL, SEARXNG_LIMITER, SEARXNG_VALKEY_URL,
+#   SEARXNG_PUBLIC_INSTANCE, SEARXNG_IMAGE_PROXY, SEARXNG_DEBUG
+
+use_default_settings:
+  engines:
+    # Drop engines that are useless or noisy for a personal instance.
+    remove:
+      - ahmia          # .onion search, needs a Tor proxy
+      - torch          # .onion search, needs a Tor proxy
+
+general:
+  instance_name: "My Search"
+  # mailto:you@example.com or a URL; false hides the link.
+  contact_url: false
+  privacypolicy_url: false
+  donation_url: false
+  enable_metrics: true
+
+brand:
+  # Footer links shown on every page. Point these at your own repo/docs.
+  custom:
+    links:
+      "Source": "https://github.com/ped4enko/my-search"
+
+search:
+  # 0: off, 1: moderate, 2: strict
+  safe_search: 1
+  autocomplete: "duckduckgo"
+  autocomplete_min: 3
+  favicon_resolver: "duckduckgo"
+  # "auto" = detect from the browser; set "uk-UA" or "en-US" to force.
+  default_lang: "auto"
+  # Only offer these search languages in the UI (keeps the dropdown short).
+  languages:
+    - all
+    - auto
+    - uk
+    - uk-UA
+    - en
+    - en-US
+    - en-GB
+  # html for the UI, json for API/clients (e.g. browser extensions, LLM tools).
+  formats:
+    - html
+    - json
+
+server:
+  port: 8080
+  bind_address: "0.0.0.0"
+  # Public URL - overridden by SEARXNG_BASE_URL in .env.
+  base_url: false
+  # Overridden by SEARXNG_SECRET in .env. Generate: openssl rand -hex 32
+  secret_key: "CHANGE_ME__run__openssl_rand_-hex_32"
+  # Bot protection via Valkey (see limiter.toml). Overridden by SEARXNG_LIMITER.
+  limiter: true
+  public_instance: false
+  image_proxy: true
+  method: "GET"
+
+valkey:
+  # Hostname "valkey" matches the service name in docker-compose.yml.
+  url: valkey://valkey:6379/0
+
+ui:
+  default_theme: simple
+  # Interface language: "" = browser, "uk" or "en" to force.
+  default_locale: ""
+  theme_args:
+    # auto | light | dark | black
+    simple_style: auto
+  center_alignment: true
+  results_on_new_tab: false
+  hotkeys: default
+  url_formatting: pretty
+  query_in_title: false
+
+locales:
+  uk: Українська
+  en: English
+
+preferences:
+  # Prevent per-user override of these on the /preferences page.
+  lock:
+    - image_proxy
+    - method
+
+outgoing:
+  request_timeout: 4.0
+  max_request_timeout: 10.0
+  pool_connections: 100
+  enable_http2: true
+
+plugins:
+  searx.plugins.calculator.SXNGPlugin:
+    active: true
+  searx.plugins.hash_plugin.SXNGPlugin:
+    active: true
+  searx.plugins.self_info.SXNGPlugin:
+    active: true
+  searx.plugins.unit_converter.SXNGPlugin:
+    active: true
+  searx.plugins.time_zone.SXNGPlugin:
+    active: true
+  searx.plugins.tracker_url_remover.SXNGPlugin:
+    active: true
+  searx.plugins.hostnames.SXNGPlugin:
+    active: true
+  searx.plugins.infinite_scroll.SXNGPlugin:
+    active: false
+  searx.plugins.oa_doi_rewrite.SXNGPlugin:
+    active: false
+  searx.plugins.tor_check.SXNGPlugin:
+    active: false
+
+# Hostnames plugin: rewrite / hide / re-rank result domains.
+hostnames:
+  low_priority:
+    - '(.*\.)?pinterest\.(com|ru)$'
+  high_priority:
+    - '(.*\.)?wikipedia\.org$'
+
+# Engine overrides are merged by "name" with upstream defaults.
+# disabled: true  -> hidden by default, user can enable it in preferences.
+engines:
+  # --- general web -------------------------------------------------------
+  - name: duckduckgo
+    disabled: false
+  - name: brave
+    disabled: false
+  - name: qwant
+    disabled: false
+  # startpage / mojeek are "inactive" upstream (PoW captcha) - not usable.
+  - name: bing
+    disabled: false
+  - name: wikipedia
+    disabled: false
+  - name: wikidata
+    disabled: false
+  # Plain Google scraping is frequently blocked; keep opt-in. Google CSE
+  # (default-enabled upstream) works without an API key.
+  - name: google
+    disabled: true
+  - name: yandex
+    disabled: true
+  # --- images / videos / news ------------------------------------------------
+  - name: duckduckgo images
+    disabled: false
+  - name: bing images
+    disabled: false
+  - name: brave.images
+    disabled: false
+  - name: duckduckgo videos
+    disabled: false
+  - name: youtube
+    disabled: false
+  - name: duckduckgo news
+    disabled: false
+  - name: bing news
+    disabled: false
+  - name: brave.news
+    disabled: false
+  # --- IT ------------------------------------------------------------------
+  - name: github
+    disabled: false
+  - name: stackoverflow
+    disabled: false
+  - name: docker hub
+    disabled: false
+  - name: npm
+    disabled: false
+  - name: pypi
+    disabled: false
+  # --- maps / translate ----------------------------------------------------
+  - name: openstreetmap
+    disabled: false
+  - name: lingva
+    disabled: false

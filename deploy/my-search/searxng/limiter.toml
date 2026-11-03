@@ -1,0 +1,33 @@
+# Bot protection / rate limiting. Only active when server.limiter = true
+# (or SEARXNG_LIMITER=true) and Valkey is reachable.
+# Reference: https://docs.searxng.org/admin/searx.limiter.html
+
+[botdetection]
+ipv4_prefix = 32
+ipv6_prefix = 48
+
+# Networks allowed to pass the real client IP via X-Forwarded-For / X-Real-IP.
+# Docker's default bridge networks are covered by 172.16.0.0/12.
+trusted_proxies = [
+  '127.0.0.0/8',
+  '::1',
+  '172.16.0.0/12',
+  '10.0.0.0/8',
+  '192.168.0.0/16',
+  'fd00::/8',
+]
+
+[botdetection.ip_limit]
+filter_link_local = false
+# Stricter check that requires the browser to load a CSS "token" first.
+# Turn on for a public instance; leave off for personal/API usage.
+link_token = false
+
+[botdetection.ip_lists]
+block_ip = []
+# Your home/office IPs or VPN range: never rate-limited.
+pass_ip = [
+  # '203.0.113.10',
+  # '10.0.0.0/8',
+]
+pass_searxng_org = false
